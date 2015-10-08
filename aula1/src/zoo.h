@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+
 using namespace std;
 
 
@@ -16,6 +17,7 @@ class Veterinario {
 	long codOrdem;
 	//...
 public:
+	Veterinario(string nome, long codOrdem);
 	string getInformacao() const;
 	string getNome() const;
 	//...
@@ -28,6 +30,7 @@ protected:
 	Veterinario *vet;
 	static int maisJovem;
 public:
+	Animal(string nome, int idade, Veterinario* vet);
 	virtual ~Animal(){};
 	string getNome() const;
 	virtual string getInformacao() const;  // informacao sobre nome animal, idade animal, nome do veterinario

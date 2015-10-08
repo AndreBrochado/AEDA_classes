@@ -8,7 +8,7 @@
 using namespace std;
 
 void test_a_criarAnimais() {
-	/*Animal *a1=new Cao("kurika",10,"estrela");  //nome, idade, raça
+	Animal *a1=new Cao("kurika",10,"estrela");  //nome, idade, raça
 	Animal *a2=new Morcego("bobo",2,70,2);  //nome, idade, velocidade_maxima, altura_maxima
 	Animal *a3=new Cao("bobby",3,"rafeiro");
 	Animal *a4=new Cao("fly",7,"dalmata");
@@ -18,7 +18,7 @@ void test_a_criarAnimais() {
 	ASSERT_EQUAL("bobby", a3->getNome());
 	ASSERT_EQUAL("fly", a4->getNome());
 	ASSERT_EQUAL("timao", a5->getNome());
-	ASSERT_EQUAL(2, Animal::getMaisJovem());*/
+	ASSERT_EQUAL(2, Animal::getMaisJovem());
 }
 
 
