@@ -1,191 +1,157 @@
 #include "cute.h"
 #include "ide_listener.h"
 #include "cute_runner.h"
-#include "parque.h"
+#include "Jogo.h"
+#include "Dicionario.h"
+#include <fstream>
 
 
-void test_a_Pesquisa() {
-	ParqueEstacionamento p1(10,20);
-	p1.novo_cliente("Joao Santos");
-	p1.novo_cliente("Pedro Morais");
-	p1.novo_cliente("Rui Silva");
-	p1.novo_cliente("Susana Costa");
-	p1.novo_cliente("Maria Tavares");
-	ASSERT_EQUAL(0, p1.posicao_cliente("Joao Santos"));
-	ASSERT_EQUAL(4, p1.posicao_cliente("Maria Tavares"));
-	ASSERT_EQUAL(1, p1.posicao_cliente("Pedro Morais"));
-	ASSERT_EQUAL(-1, p1.posicao_cliente("Tiago Tavares"));
+void test_1a_CriaDicionario(){
+	ifstream fich;
+    fich.open("dic.txt");
+	ASSERTM("Erro ao Abrir o Ficheiro", fich);
+	Dicionario d1;
+	d1.lerDicionario(fich);
+	fich.close();
+	BST<PalavraSignificado> arvPals=d1.getPalavras();
+	BSTItrIn<PalavraSignificado> it(arvPals);
+	it.advance(); it.advance();
+	ASSERT_EQUAL("gato", it.retrieve().getPalavra());
 }
 
-void test_b_UtilizacaoParque() {
-	ParqueEstacionamento p1(10,20);
-	p1.novo_cliente("Joao Santos");
-	p1.novo_cliente("Pedro Morais");
-	p1.novo_cliente("Rui Silva");
-	p1.novo_cliente("Susana Costa");
-	p1.novo_cliente("Maria Tavares");
-	p1.entrar("Maria Tavares");
-	p1.entrar("Susana Costa");
-	p1.sair("Susana Costa");
-	p1.sair("Maria Tavares");
-	p1.entrar("Maria Tavares");
-	p1.sair("Maria Tavares");
-	p1.entrar("Rui Silva");
-	p1.sair("Rui Silva");
-	p1.entrar("Susana Costa");
-	p1.entrar("Rui Silva");
-	p1.sair("Rui Silva");
-	p1.entrar("Rui Silva");
-	p1.entrar("Pedro Morais");
-	ASSERT_EQUAL(3, p1.num_utilizacoes("Rui Silva"));
-	ASSERT_EQUAL(1, p1.num_utilizacoes("Pedro Morais"));
-	ASSERT_EQUAL(0, p1.num_utilizacoes("Joao Santos"));
-	ASSERT_THROWS(p1.num_utilizacoes("Tiago Silva"), ClienteNaoExistente);
+void test_1b_ImprimeDicionario(){
+	ASSERTM("Este teste não falha. Verifique na consola os valores", true);
+	ifstream fich;
+	fich.open("dic.txt");
+	ASSERTM("Erro ao Abrir o Ficheiro", fich);
+	Dicionario d1;
+	d1.lerDicionario(fich);
+	fich.close();
+	d1.imprime();
+}
+
+void test_1c_ConsultaDicionario(){
+	ifstream fich;
+	fich.open("dic.txt");
+	ASSERTM("Erro ao Abrir o Ficheiro", fich);
+	Dicionario d1;
+	d1.lerDicionario(fich);
+	fich.close();
+	ASSERT_EQUAL("mamifero felino", d1.consulta("gato"));
+	ASSERT_THROWS(d1.consulta("rio"), PalavraNaoExiste);
 	try {
-		p1.num_utilizacoes("Tiago Silva");
+		string signf=d1.consulta("janela");
 	}
-	catch (ClienteNaoExistente &e) {
-		cout << "Apanhou excepção. Cliente não existente: " << e.getNome() << endl;
-		ASSERT_EQUAL("Tiago Silva", e.getNome());
+	catch (PalavraNaoExiste &e) {
+		cout << "Apanhou excepção: PalavraNaoExiste" << endl;
+		ASSERT_EQUAL("ilha", e.getPalavraAntes());
+		ASSERT_EQUAL("porção de terra emersa rodeada de água", e.getSignificadoAntes());
+		ASSERT_EQUAL("macaco", e.getPalavraApos());
+		ASSERT_EQUAL("mamifero da ordem dos primatas", e.getSignificadoApos());
 	}
 }
 
-void test_c_OrdenaUtilizacao() {
-	ParqueEstacionamento p1(10,20);
-	p1.novo_cliente("Joao Santos");
-	p1.novo_cliente("Pedro Morais");
-	p1.novo_cliente("Rui Silva");
-	p1.novo_cliente("Susana Costa");
-	p1.novo_cliente("Maria Tavares");
-	p1.entrar("Maria Tavares");
-	p1.entrar("Susana Costa");
-	p1.sair("Susana Costa");
-	p1.sair("Maria Tavares");
-	p1.entrar("Maria Tavares");
-	p1.sair("Maria Tavares");
-	p1.entrar("Rui Silva");
-	p1.sair("Rui Silva");
-	p1.entrar("Susana Costa");
-	p1.entrar("Rui Silva");
-	p1.sair("Rui Silva");
-	p1.entrar("Rui Silva");
-	p1.entrar("Pedro Morais");
-	// Joao Santos: 0 utilizacoes
-	// Pedro Morais: 1 utilizacao
-	// Maria Tavares: 2 utilizacoes
-	// Susana Costa: 2 utilizacao
-	// Rui Silva: 3 utilizacoes
-	p1.ordena_clientes_utilizacao();
-	InfoCartao ic1=p1.get_clientes()[2];
-	ASSERT_EQUAL("Susana Costa", ic1.nome);
-	ASSERT_EQUAL(2, ic1.utilizacao);
-	InfoCartao ic2=p1.get_clientes()[0];
-	ASSERT_EQUAL("Rui Silva", ic2.nome);
-	ASSERT_EQUAL(3, ic2.utilizacao);
-}
-
-void test_d_GamasUso() {
-	ParqueEstacionamento p1(10,20);
-	p1.novo_cliente("Joao Santos");
-	p1.novo_cliente("Pedro Morais");
-	p1.novo_cliente("Rui Silva");
-	p1.novo_cliente("Susana Costa");
-	p1.novo_cliente("Maria Tavares");
-	p1.entrar("Maria Tavares");
-	p1.entrar("Susana Costa");
-	p1.sair("Susana Costa");
-	p1.sair("Maria Tavares");
-	p1.entrar("Maria Tavares");
-	p1.sair("Maria Tavares");
-	p1.entrar("Rui Silva");
-	p1.sair("Rui Silva");
-	p1.entrar("Susana Costa");
-	p1.entrar("Rui Silva");
-	p1.sair("Rui Silva");
-	p1.entrar("Rui Silva");
-	p1.entrar("Pedro Morais");
-	// Joao Santos: 0 utilizacoes
-	// Pedro Morais: 1 utilizacao
-	// Maria Tavares: 2 utilizacoes
-	// Susana Costa: 2 utilizacao
-	// Rui Silva: 3 utilizacoes
-	vector<string> clientes = p1.clientes_gama_uso(2,3);
-	ASSERT_EQUAL(3,clientes.size());
-	ASSERT_EQUAL("Rui Silva", clientes[0]);
-	ASSERT_EQUAL("Maria Tavares", clientes[1]);
-	ASSERT_EQUAL("Susana Costa", clientes[2]);
+void test_1d_CorrigeDicionario(){
+	ifstream fich;
+	fich.open("dic.txt");
+	ASSERTM("Erro ao Abrir o Ficheiro", fich);
+	Dicionario d1;
+	d1.lerDicionario(fich);
+	fich.close();
+	ASSERT_EQUAL(true,d1.corrige("morango","fruto vermelho"));
+	ASSERT_EQUAL("fruto vermelho", d1.consulta("morango"));
+	ASSERT_EQUAL(false,d1.corrige("esquilo","pequeno mamifero roedor de cauda longa"));
+	BST<PalavraSignificado> arvPals=d1.getPalavras();
+	BSTItrIn<PalavraSignificado> it(arvPals);
+	it.advance(); it.advance();
+	ASSERT_EQUAL("esquilo", it.retrieve().getPalavra());
+	ASSERT_EQUAL("pequeno mamifero roedor de cauda longa", d1.consulta("esquilo"));
 }
 
 
-void test_e_OrdenaNome() {
-	ParqueEstacionamento p1(10,20);
-	p1.novo_cliente("Joao Santos");
-	p1.novo_cliente("Pedro Morais");
-	p1.novo_cliente("Rui Silva");
-	p1.novo_cliente("Susana Costa");
-	p1.novo_cliente("Maria Tavares");
-	p1.entrar("Maria Tavares");
-	p1.entrar("Susana Costa");
-	p1.sair("Susana Costa");
-	p1.sair("Maria Tavares");
-	p1.entrar("Maria Tavares");
-	p1.sair("Maria Tavares");
-	p1.entrar("Rui Silva");
-	p1.sair("Rui Silva");
-	p1.entrar("Susana Costa");
-	p1.entrar("Rui Silva");
-	p1.sair("Rui Silva");
-	p1.entrar("Rui Silva");
-	p1.entrar("Pedro Morais");
-	p1.ordena_clientes_nome();
-	InfoCartao ic1=p1.get_clientes()[2];
-	ASSERT_EQUAL("Pedro Morais", ic1.nome);
-	InfoCartao ic2=p1.get_clientes()[0];
-	ASSERT_EQUAL("Joao Santos", ic2.nome);
+void test_2a_InicioJogo(){
+/*	vector<int> pontos;
+	vector<bool> estados;
+	pontos.push_back(1); pontos.push_back(2); pontos.push_back(3);
+	pontos.push_back(4); pontos.push_back(5); pontos.push_back(6); pontos.push_back(7);
+	estados.push_back(true); estados.push_back(false); estados.push_back(false);
+	estados.push_back(false); estados.push_back(false); estados.push_back(true); estados.push_back(false);
+    Jogo jogo1(2, pontos,estados);
+    ASSERT_EQUAL(1, jogo1.getJogo().getRoot().getPontuacao());*/
 }
 
-void test_f_InfoClientes() {
-	ParqueEstacionamento p1(10,20);
-	p1.novo_cliente("Joao Santos");
-	p1.novo_cliente("Pedro Morais");
-	p1.novo_cliente("Rui Silva");
-	p1.novo_cliente("Susana Costa");
-	p1.novo_cliente("Maria Tavares");
-	p1.entrar("Maria Tavares");
-	p1.entrar("Susana Costa");
-	p1.sair("Susana Costa");
-	p1.entrar("Rui Silva");
-	p1.entrar("Susana Costa");
-	ASSERTM("Este teste nunca falha! VERIFICAR informação escrita no monitor", true);
-	cout << p1;
-	InfoCartao ic=p1.get_cliente_pos(2);
-	ASSERT_EQUAL("Rui Silva", ic.nome);
-	ASSERT_THROWS(p1.get_cliente_pos(6), PosicaoNaoExistente);
-	try {
-		p1.get_cliente_pos(6);
-	}
-	catch (PosicaoNaoExistente &e) {
-		ASSERTM("Este teste nunca falha. Verifique no monitor a informação", true);
-		cout << "Apanhou excepção. Posição não existente:" << e.getValor() << endl;
-		ASSERT_EQUAL(6, e.getValor());
-	}
+void test_2b_EscreveJogo(){
+	/*vector<int> pontos;
+	vector<bool> estados;
+	pontos.push_back(1); pontos.push_back(2); pontos.push_back(3);
+	pontos.push_back(4); pontos.push_back(5); pontos.push_back(6);
+	pontos.push_back(7); pontos.push_back(8); pontos.push_back(9);
+	pontos.push_back(10); pontos.push_back(11); pontos.push_back(12);
+	pontos.push_back(13); pontos.push_back(14); pontos.push_back(15);
+	estados.push_back(true); estados.push_back(false); estados.push_back(false);
+	estados.push_back(false); estados.push_back(false); estados.push_back(true);
+	estados.push_back(false); estados.push_back(true); estados.push_back(true);
+	estados.push_back(true); estados.push_back(true); estados.push_back(true);
+	estados.push_back(true); estados.push_back(true); estados.push_back(true);
+    Jogo jogo1(3, pontos,estados);
+    string jogoStr="1-true-0\n2-false-0\n3-false-0\n4-false-0\n5-false-0\n6-true-0\n7-false-0\n8-true-0\n9-true-0\n10-true-0\n11-true-0\n12-true-0\n13-true-0\n14-true-0\n15-true-0\n";
+    ASSERT_EQUAL(jogoStr, jogo1.escreveJogo());*/
+}
+
+void test_2c_FazJogada(){
+/*	vector<int> pontos;
+	vector<bool> estados;
+	pontos.push_back(1); pontos.push_back(2); pontos.push_back(3);
+	pontos.push_back(4); pontos.push_back(5); pontos.push_back(6);
+	pontos.push_back(7); pontos.push_back(8); pontos.push_back(9);
+	pontos.push_back(10); pontos.push_back(11); pontos.push_back(12);
+	pontos.push_back(13); pontos.push_back(14); pontos.push_back(15);
+	estados.push_back(true); estados.push_back(false); estados.push_back(false);
+	estados.push_back(false); estados.push_back(false); estados.push_back(true);
+	estados.push_back(false); estados.push_back(true); estados.push_back(true);
+	estados.push_back(true); estados.push_back(true); estados.push_back(true);
+	estados.push_back(true); estados.push_back(true); estados.push_back(true);
+    Jogo jogo1(3, pontos,estados);
+    ASSERT_EQUAL(13, jogo1.jogada());
+    ASSERT_EQUAL(8,jogo1.jogada());*/
+}
+
+void test_2d_MaisVisitado(){
+	/*vector<int> pontos;
+	vector<bool> estados;
+	pontos.push_back(1); pontos.push_back(2); pontos.push_back(3);
+	pontos.push_back(4); pontos.push_back(5); pontos.push_back(6);
+	pontos.push_back(7); pontos.push_back(8); pontos.push_back(9);
+	pontos.push_back(10); pontos.push_back(11); pontos.push_back(12);
+	pontos.push_back(13); pontos.push_back(14); pontos.push_back(15);
+	estados.push_back(true); estados.push_back(false); estados.push_back(false);
+	estados.push_back(false); estados.push_back(false); estados.push_back(true);
+	estados.push_back(false); estados.push_back(true); estados.push_back(true);
+	estados.push_back(true); estados.push_back(true); estados.push_back(true);
+	estados.push_back(true); estados.push_back(true); estados.push_back(true);
+	Jogo jogo1(3, pontos,estados);
+	jogo1.jogada(); jogo1.jogada(); jogo1.jogada();
+	ASSERT_EQUAL(2, jogo1.maisVisitado());
+	jogo1.jogada(); jogo1.jogada(); jogo1.jogada();jogo1.jogada();
+	ASSERT_EQUAL(4, jogo1.maisVisitado());*/
 }
 
 
 void runSuite(){
 	cute::suite s;
-	s.push_back(CUTE(test_a_Pesquisa));
-	s.push_back(CUTE(test_b_UtilizacaoParque));
-	s.push_back(CUTE(test_c_OrdenaUtilizacao));
-	s.push_back(CUTE(test_d_GamasUso));
-	s.push_back(CUTE(test_e_OrdenaNome));
-	s.push_back(CUTE(test_f_InfoClientes));
+	s.push_back(CUTE(test_1a_CriaDicionario));
+	s.push_back(CUTE(test_1b_ImprimeDicionario));
+	s.push_back(CUTE(test_1c_ConsultaDicionario));
+	s.push_back(CUTE(test_1d_CorrigeDicionario));
+	s.push_back(CUTE(test_2a_InicioJogo));
+	s.push_back(CUTE(test_2b_EscreveJogo));
+	s.push_back(CUTE(test_2c_FazJogada));
+	s.push_back(CUTE(test_2d_MaisVisitado));
 	cute::ide_listener<> lis;
-	cute::makeRunner(lis)(s, "AEDA 2015/2016 - Aula Pratica 5");
+	cute::makeRunner(lis)(s, "AEDA 2015/2016 - Aula Pratica 9");
 }
 
 int main(){
-
     runSuite();
     return 0;
 }
